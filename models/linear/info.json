@@ -1,0 +1,1 @@
+{"type": "linear", "normalize": false, "features": "age", "target": "charges", "r2": 0.9328636689609504, "rmse": 503.72956317641996}

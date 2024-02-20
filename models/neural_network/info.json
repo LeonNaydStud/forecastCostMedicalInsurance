@@ -1,0 +1,1 @@
+{"type": "neural network", "normalize": true, "features": ["age", "children", "bmi", "sex_male"], "target": "charges", "r2": 0.9682012562147554, "rmse": 0.04335124226713883, "scheme": "4->4->4->1"}
