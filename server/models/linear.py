@@ -9,6 +9,12 @@ current_dir = os.path.dirname(__file__)
 model_path = os.path.join(current_dir, '..', '..', 'models', 'linear', 'model.pickle')
 info_path = os.path.join(current_dir, '..', '..', 'models', 'linear', 'info.json')
 
+# Verify paths exist before loading
+if not os.path.exists(model_path):
+    raise FileNotFoundError(f"Model file not found at: {model_path}")
+if not os.path.exists(info_path):
+    raise FileNotFoundError(f"Info file not found at: {info_path}")
+
 # Load the model and info
 with open(model_path, 'rb') as f:
     model = pickle.load(f)
