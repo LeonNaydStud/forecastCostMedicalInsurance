@@ -6,8 +6,8 @@ import os
 current_dir = os.path.dirname(__file__)
 
 # Construct paths relative to the script location
-model_path = os.path.join(current_dir, '..', '..', 'models', 'linear', 'model.pickle')
-info_path = os.path.join(current_dir, '..', '..', 'models', 'linear', 'info.json')
+model_path = os.path.join(current_dir, '..', 'models', 'linear', 'model.pickle')
+info_path = os.path.join(current_dir, '..', 'models', 'linear', 'info.json')
 
 # Verify paths exist before loading
 if not os.path.exists(model_path):
