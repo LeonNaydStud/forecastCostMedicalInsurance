@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import tensorflow as tf
 import numpy as np
@@ -9,10 +10,9 @@ from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 import json
 
-df = pd.read_csv('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/data.csv', sep=',', header=0)
+df = pd.read_csv('D:/PyCharmProjects/forecastCostMedicalInsurance/data.csv', sep=',', header=0)
 VALID_SIZE = 0.3
 RAND_SEED = 8
-
 
 def create_linear():
     features = ['age']
@@ -43,12 +43,12 @@ def create_linear():
                 'target': 'charges',
                 'r2': r2,
                 'rmse': rmse}
-        with open('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/linear/info.json', 'w', encoding='utf-8') as filestream:
+        with open('D:/PyCharmProjects/forecastCostMedicalInsurance/models/linear/info.json', 'w', encoding='utf-8') as filestream:
             json.dump(info, filestream, ensure_ascii=False)
-        with open('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/linear/model.pickle', mode='wb') as filestream:
+        with open('D:/PyCharmProjects/forecastCostMedicalInsurance/models/linear/model.pickle', mode='wb') as filestream:
             pickle.dump(lin_model_charges, filestream)
-        df_x.to_csv('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/linear/dfX.csv', index=False)
-        df_y.to_csv('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/linear/dfY.csv', index=False)
+        df_x.to_csv('D:/PyCharmProjects/forecastCostMedicalInsurance/models/linear/dfX.csv', index=False)
+        df_y.to_csv('D:/PyCharmProjects/forecastCostMedicalInsurance/models/linear/dfY.csv', index=False)
 
 
 def create_neural_network():
@@ -82,9 +82,6 @@ def create_neural_network():
         shuffle=True
     )
 
-    print(xNorm_train[:2])
-    print(yNorm_train)
-
     with tf.device('/CPU:0'):
         totalLossTrain = []
         totalLossTest = []
@@ -93,64 +90,62 @@ def create_neural_network():
         output_size = 1
 
         model = tf.keras.models.Sequential()
-
         model.add(tf.keras.layers.Input(shape=(input_size,)))
-        model.add(tf.keras.layers.Dense(units=4, activation=tf.keras.activations.relu))
-        model.add(tf.keras.layers.Dense(units=4, activation=tf.keras.activations.relu))
-        model.add(tf.keras.layers.Dense(units=output_size, activation=tf.keras.activations.linear))
+        model.add(tf.keras.layers.Dense(units=4, activation='relu'))
+        model.add(tf.keras.layers.Dense(units=4, activation='relu'))
+        model.add(tf.keras.layers.Dense(units=output_size, activation='linear'))
 
-        LossFunction = tf.keras.losses.mean_squared_error
-        OptimisationFunction = tf.keras.optimizers.Adam(learning_rate=0.01)
-        MetricFunction = [tf.keras.losses.mean_squared_error]
-
-        model.compile(loss=LossFunction, optimizer=OptimisationFunction, metrics=[MetricFunction])
+        model.compile(
+            loss=tf.keras.losses.MeanSquaredError(),
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.01),
+            metrics=[tf.keras.metrics.MeanSquaredError()]
+        )
 
         print(model.summary())
 
-    with tf.device('/CPU:0'):
         history = model.fit(
-            xNorm_train[['age', 'children', 'bmi', 'sex_male', ]],
+            xNorm_train[features],
             yNorm_train,
-            validation_data=(
-                xNorm_test[['age', 'children', 'bmi', 'sex_male', ]],
-                yNorm_test),
+            validation_data=(xNorm_test[features], yNorm_test),
             epochs=epochForTrain,
-            verbose=2, )
+            verbose=2
+        )
         totalLossTrain.extend(history.history['loss'])
         if 'val_loss' in history.history.keys():
             totalLossTest.extend(history.history['val_loss'])
 
-    with tf.device('/CPU:0'):
-        yNorm_pred = model.predict(xNorm_test[['age', 'children', 'bmi', 'sex_male', ]])
+        yNorm_pred = model.predict(xNorm_test[features])
+
+    # Правильный расчет метрик
     mse = metrics.mean_squared_error(yNorm_test, yNorm_pred)
     rmse = np.sqrt(mse)
     r2 = metrics.r2_score(yNorm_test, yNorm_pred)
 
-    print(r2)
+    print(f"R2: {r2}")
+    print(f"RMSE: {rmse}")
 
-    if (r2 > 0.75):
-        info = {'type': 'neural network',
-                'normalize': True,
-                'features': ['age', 'children', 'bmi', 'sex_male'],
-                'target': 'charges',
-                'r2': r2,
-                'rmse': rmse,
-                'scheme': '4->4->4->1'}
-        with open('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/neural_network/info.json', 'w', encoding='utf-8') as filestream:
-            json.dump(info, filestream, ensure_ascii=False)
-        with open('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/neural_network/normalizer.pickle', mode='wb') as filestream:
-            scaler = {'x': scalerNormX,
-                      'y': scalerNormY}
-            pickle.dump(scaler, filestream)
-        model.save('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/neural_network/model')
-        dfX.to_csv('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/neural_network/dfX.csv', index=False)
-        dfY.to_csv('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/neural_network/dfY.csv', index=False)
-
+    if r2 > 0.75:
+        info = {
+            'type': 'neural network',
+            'normalize': True,
+            'features': features,
+            'target': 'charges',
+            'r2': float(r2),  # преобразуем numpy тип в python float
+            'rmse': float(rmse),
+            'scheme': '4->4->4->1'
+        }
+        os.makedirs('D:/PyCharmProjects/forecastCostMedicalInsurance/models/neural_network', exist_ok=True)
+        with open('D:/PyCharmProjects/forecastCostMedicalInsurance/models/neural_network/info.json', 'w', encoding='utf-8') as f:
+            json.dump(info, f, ensure_ascii=False)
+        with open('D:/PyCharmProjects/forecastCostMedicalInsurance/models/neural_network/normalizer.pickle', 'wb') as f:
+            pickle.dump({'x': scalerNormX, 'y': scalerNormY}, f)
+        model.save('D:/PyCharmProjects/forecastCostMedicalInsurance/models/neural_network/model.keras')
+        dfX.to_csv('D:/PyCharmProjects/forecastCostMedicalInsurance/models/neural_network/dfX.csv', index=False)
+        dfY.to_csv('D:/PyCharmProjects/forecastCostMedicalInsurance/models/neural_network/dfY.csv', index=False)
 
 def main():
     create_linear()
     create_neural_network()
-
 
 if __name__ == '__main__':
     main()

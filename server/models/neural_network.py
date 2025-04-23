@@ -3,12 +3,12 @@ import pandas as pd
 import tensorflow as tf
 import json
 
-model = tf.keras.models.load_model('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/neural_network/model')
+model = tf.keras.models.load_model('D:/PyCharmProjects/forecastCostMedicalInsurance/models/neural_network/model.keras')
 
-with open('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/neural_network/info.json', 'r', encoding='utf-8') as filestream:
+with open('D:/PyCharmProjects/forecastCostMedicalInsurance/models/neural_network/info.json', 'r', encoding='utf-8') as filestream:
     info = json.load(filestream)
 
-with open('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/neural_network/normalizer.pickle', mode='rb') as filestream:
+with open('D:/PyCharmProjects/forecastCostMedicalInsurance/models/neural_network/normalizer.pickle', mode='rb') as filestream:
     scaler = pickle.load(filestream)
 
 def def_sex(sex_str: str) -> int:

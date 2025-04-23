@@ -1,12 +1,11 @@
 import pickle
-import pandas as pd
-import tensorflow as tf
+from sklearn import linear_model
 import json
 
-with open('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/linear/model.pickle', mode='rb') as filestream:
+with open('D:/PyCharmProjects/forecastCostMedicalInsurance/models/linear/model.pickle', mode='rb') as filestream:
     linear_model = pickle.load(filestream)
 
-with open('/Users/leonnayd/Desktop/forecastCostMedicalInsurance/models/linear/info.json', 'r', encoding='utf-8') as filestream:
+with open('D:/PyCharmProjects/forecastCostMedicalInsurance/models/linear/info.json', 'r', encoding='utf-8') as filestream:
     info = json.load(filestream)
 
 def calculate(age: float) -> float:
