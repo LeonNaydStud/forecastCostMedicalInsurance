@@ -1,5 +1,4 @@
 import pickle
-from sklearn import linear_model
 import json
 
 with open('D:/PyCharmProjects/forecastCostMedicalInsurance/models/linear/model.pickle', mode='rb') as filestream:
